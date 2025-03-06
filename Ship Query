@@ -1,0 +1,177 @@
+Voyage data
+
+select current_date Data_Pull_Date
+
+    , VM.dw_brand_short_name Brand
+
+    , VM.vyd_voyage Voyage
+
+    , case
+
+      when VM.vyd_voyage_type = 'B' then 'Logical'
+
+      when VM.vyd_voyage_type = 'S' then 'Segmented'
+
+      when VM.vyd_voyage_type = 'O' then 'Overlapping'
+
+      else 'Pysical'
+
+      end Voyage_Type
+
+    , VM.vyd_basic_sea_days Voyage_Length
+
+    , VM.vyd_sail_date Sail_Date
+
+    , VM.vyd_return_date Return_Date
+
+    , case
+
+      when VM.vyd_trade = 'A' then 'Alaska'
+
+      when VM.vyd_trade = 'C' then 'Caribbean'
+
+      when VM.vyd_trade = 'E' then 'Northern Europe'
+
+      when VM.vyd_trade = 'F' then 'Southern Europe'
+
+      when VM.vyd_trade = 'H' then 'Hawaii'
+
+      when VM.vyd_trade = 'I' then 'Transatlantic'
+
+      when VM.vyd_trade = 'J' then 'Japan'
+
+      when VM.vyd_trade = 'L' then 'Coastal'
+
+      when VM.vyd_trade = 'M' then 'Mexico'
+
+      when VM.vyd_trade = 'N' then 'Canada/New England'
+
+      when VM.vyd_trade = 'O' then 'Asia/Orient'
+
+      when VM.vyd_trade = 'P' then 'South Pacific'
+
+      when VM.vyd_trade = 'R' then 'China/Taiwan'
+
+      when VM.vyd_trade = 'S' then 'South America'
+
+      when VM.vyd_trade = 'T' then 'Transcanal'
+
+      when VM.vyd_trade = 'U' then 'Australia/NewZealand'
+
+      when VM.vyd_trade = 'W' then 'World Cruise'
+
+      when VM.vyd_trade = 'X' then 'Exotics'
+
+      end Trade
+
+    , BP.b_p_pastpax_nbr CCN
+
+    , BP.b_bkng_nbr || BP.b_p_passenger_id Booking_ID
+
+    , BP.b_bkng_nbr Booking_Number
+
+    , BP.b_p_passenger_id Passenger_ID
+
+    , BM.b_status Booking_Status
+
+    , BP.b_p_passenger_status Passenger_Status
+
+    , case when BP.b_p_original_loyalty_level = 'B' then 'Blue'
+
+           when BP.b_p_original_loyalty_level = 'G' then 'Gold'
+
+           when BP.b_p_original_loyalty_level = 'R' then 'Ruby'
+
+           when BP.b_p_original_loyalty_level = 'P' then 'Platinum'
+
+           when BP.b_p_original_loyalty_level = 'E' then 'Elite'
+
+           else NULL
+
+      end loyalty_level
+
+    , BP.b_p_sex Gender
+
+    , BP.b_p_age Age
+
+    , BP.b_p_nationality Nationality
+
+    , BM.b_open_date Booking_Open_Date
+
+    , BM.b_status Booking_Status
+
+    , case when BM.b_cancel_code = 'R' then 'Refund due'
+
+           when BM.b_cancel_code = 'T' then 'Transfer money to another sailing'
+
+           when BM.b_cancel_code = 'U' then 'Cancel without penalty (Security required)'
+
+           when BM.b_cancel_code = 'W' then 'Cancelled Waitlist Booking (Booking didnt clear WL)'
+
+           else BM.b_cancel_code 
+
+      end Booking_Cancel_Code_Expanded
+
+    , BM.b_cancel_date Booking_Cancel_Date
+
+    , BM.b_cancel_reason Booking_Cancel_Reason
+
+    , BP.b_p_cancel_date Passenger_Cancel_Date
+
+    , BM.b_final_paymt_recvd_date Final_Payment_Date -- this is a comment
+
+    , BM.b_currency_code Currency
+
+    , BM.b_local_per_rpt_rate Exchange_Rate
+
+    , BP.b_p_waiver_flag Travel_Protection_Flag
+
+    , BP.b_p_waiver Travel_Protection_Amount_Local
+
+    , BP.b_p_waiver/BM.b_local_per_rpt_rate Travel_Protection_Amount_USD
+
+    , BP.b_p_gross Gross_Local
+
+    , BP.b_p_gross/BM.b_local_per_rpt_rate Gross_USD
+
+    , BP.net_fare Net_Fare_Local
+
+    , BP.net_fare/BM.b_local_per_rpt_rate Net_Fare_USD
+
+ 
+
+from workarea_db_prd1.workarea_pcl_rm.bkng_psngr_v BP
+
+         join workarea_db_prd1.workarea_pcl_rm.voyage_mstr_v VM on BP.key_voyage_mstr = VM.key_voyage_mstr
+
+         join workarea_db_prd1.workarea_pcl_rm.bkng_mstr_v BM on BP.key_bkng_mstr = BM.key_bkng_mstr
+
+        
+
+where     VM.dw_brand_short_name = 'PCL'
+
+      and VM.vyd_ship_code not in ('LP', 'Z')
+
+      and VM.vyd_return_date between '2023-12-01' and '2024-11-30'
+
+      and VM.vyd_voyage_status not in ('B', 'C', 'L','D')
+
+      and VM.vyd_voyage not like 'L%'
+
+      and BM.b_status in ('B','G')
+
+      and BP.b_p_passenger_status in ('A')
+
+      and BM.B_CATEGORY not in ('Y')
+
+      and bp.b_p_pax_type not in ('C')
+
+      and (BP.b_p_pastpax_nbr not in ('222222222A','222222222B') or BP.b_p_pastpax_nbr is null)
+
+ 
+
+      and BP.b_p_waiver_flag = 'Y'
+
+     
+
+limit 10
