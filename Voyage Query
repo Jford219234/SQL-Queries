@@ -1,0 +1,60 @@
+Deployment Query for cruise ship data
+
+
+Deployment information
+
+select
+
+--TRUNC(CURRENT_DATE) - 1 AS yesterday_date
+
+ship_name
+
+  , voyage_code voyage
+
+  , voyage_sail_date sail_date
+
+  , voyage_return_date return_date
+
+  , basic_sea_days duration
+
+  , voyage_status_code voyage_status
+
+  , voyage_capacity
+
+  , basic_from_port port_from
+
+  , basic_to_port port_to
+
+  , --product_code || sub_product || season product
+
+   trade trade_name
+
+  , decode(trim(voyage_type), '', 'P', 'L') voyage_type
+
+  ,voyage_report_code rpt_code
+
+  , --voyage_type cruise_type
+
+   web_itinerary_code web_itin_code
+
+  , --concat(min_itinerary_stub, concat('.', decode(length(min_itinerary_version), 1, concat('00',min_itinerary_version), 2, concat('0',min_itinerary_version), min_itinerary_version))) min_itinerary_version
+
+   --itinerary_desc
+
+ 
+
+from voyage_dim_v s
+
+where
+
+brand_short_name = 'PCL'
+
+and decode(trim(voyage_type),'','P','L') in ('P','L')
+
+and return_date > '2018-01-01'
+
+order by ship_code
+
+  ,sail_date
+
+  , voyage
