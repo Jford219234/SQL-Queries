@@ -1,0 +1,101 @@
+Query designed to gather port ratings for each port that a cruise ship goes to. 
+
+Port Ratings
+
+select --trunc(current_date) -1 data_date
+
+  a.question_id
+
+  , a.question_displayed_text
+
+  , count(b.psngr_respondent_id) resp_count
+
+  --, b.home_country_cd
+
+  , b.voyage_id
+
+  , d.port_name
+
+  , d.port_code
+
+  , d.country_code
+
+  , round((avg(c.scale_total_answer_score) + 1) / 11 * 100, 2) mp  --reconciles to business objects
+
+  --, sum(c.answer_score_num) answer_score_num
+
+  --, b.loyalty_level_desc
+
+  , e.voyage_sail_date
+
+,to_number(to_char(e.voyage_sail_date, 'YYYY')) year_begin
+
+  , e.voyage_return_date
+
+  ,to_number(to_char(e.voyage_return_date, 'YYYY')) year_end
+
+  , e.trade
+
+from "EDW_DB_PRD1"."DWTA_OBE"."DIM_OBE_QUESTION_V" a
+
+, "EDW_DB_PRD1"."DWTA_OBE"."DIM_OBE_PASSENGER_RESPONSE_V" b
+
+, "EDW_DB_PRD1"."DWTA_OBE"."FCT_OBE_VOYAGE_V" c
+
+, "EDW_DB_PRD1"."EDW_OWNER"."PORT_DIM_V"d
+
+, "EDW_DB_PRD1"."EDW_OWNER"."VOYAGE_DIM_V" e
+
+where 1=1 --joins copied from business objects at time of conversion
+
+and --b.psngr_response_sk = c.psngr_response_sk
+
+a.question_sk = c.question_sk
+
+-- c.port_sk = d.port_sk
+
+and b.voyage_id = e.polar_voyage_code
+
+--and b.segment_voyage_id = e.trade
+
+and a.question_id in ('PRT1', 'PRT2')
+
+and e.voyage_sail_date > '2020-01-01'
+
+and c.scale_total_answer_score not in (0,99)
+
+group by a.question_id
+
+  , a.question_displayed_text
+
+  --, b.psngr_respondent_id
+
+  --, b.home_country_cd
+
+  , b.voyage_id
+
+  , d.port_name
+
+  , d.port_code
+
+  , d.country_code
+
+  --, b.loyalty_level_desc
+
+  , e.voyage_sail_date
+
+  , to_number(to_char(e.voyage_sail_date, 'YYYY'))
+
+  , e.voyage_return_date
+
+  , to_number(to_char(e.voyage_sail_date, 'YYYY'))
+
+  , e.trade
+
+order by substr(b.voyage_id, 1, 1)
+
+  , e.voyage_sail_date
+
+  , d.port_code
+
+  , a.question_id
