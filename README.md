@@ -1,2 +1,2 @@
 # SQL-Queries
-Examples of SQL queries that I have written to answer questions and sort large sets of data in PostgreSQL. Other queries were created using Snowflake and Oracle for gathering data for large cruise ship projects. 
+Examples of SQL queries that I have written to answer questions and sort large sets of data in PostgreSQL. Checkpoint queries begin with more beginner queries and prompts and become more advanced. Ship and port rating queries are more advanced and showcase my progression using sql in a professional setting. Other queries were created using Snowflake and Oracle for gathering data for large cruise ship projects. 
